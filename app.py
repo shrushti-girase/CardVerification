@@ -2,9 +2,15 @@ from flask import Flask, render_template, request
 import firebase_admin
 from firebase_admin import credentials, db
 
-# Initialize Firebase
-cred = credentials.Certificate("cardholderform.json")
-firebase_admin.initialize_app(cred, {
+import os, json
+from firebase_admin import credentials, initialize_app, db
+
+# Load Firebase credentials from environment variable
+cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+cred_dict = json.loads(cred_json)
+cred = credentials.Certificate(cred_dict)
+
+initialize_app(cred, {
     'databaseURL': 'https://cardholderform-default-rtdb.firebaseio.com/'
 })
 
@@ -39,4 +45,5 @@ def submit():
     return render_template("fail.html")
 
 if __name__ == "__main__":
-    app.run(ssl_context="adhoc")
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
