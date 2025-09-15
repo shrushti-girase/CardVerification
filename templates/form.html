@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cardholder Verification Form</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="form-box">
+    <h2>Cardholder Verification Form</h2>
+    <form id="cardForm" action="/submit" method="POST">
+      <!-- Name -->
+      <label for="name">Name (As it appears on the card)</label>
+      <input type="text" id="name" name="name" required pattern="^[A-Za-z ]+$"
+             title="Please enter a valid name." placeholder="John Doe">
+      <small class="error" id="nameError"></small>
+
+      <!-- Birth Date -->
+      <label for="birthdate">Birth Date (YYYY/MM/DD)</label>
+      <input type="date" id="birthdate" name="birthdate" required>
+      <small class="error" id="birthdateError"></small>
+
+      <!-- Card Number -->
+      <label for="card_number">Card Number</label>
+      <input type="text" id="card_number" name="card_number" maxlength="16" minlength="16" required
+             pattern="\d{16}" title="Card number should have 16 digits." placeholder="1234567812345678">
+      <small class="error" id="cardNumberError"></small>
+
+      <!-- Expiry -->
+      <label for="expiry">Expiry Month</label>
+      <input type="month" id="expiry" name="expiry" required>
+      <small class="error" id="expiryError"></small>
+
+      <!-- CVV -->
+      <label for="cvv">CVV</label>
+      <input type="text" id="cvv" name="cvv" required pattern="^\d{3,4}$"
+             title="CVV must be 3 or 4 digits long." placeholder="123">
+      <small class="error" id="cvvError"></small>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    // Validate age >= 18
+    document.getElementById('cardForm').addEventListener('submit', function (e) {
+      const birthInput = document.getElementById('birthdate');
+      const birthDate = new Date(birthInput.value);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+
+      if (
+        isNaN(birthDate) ||
+        age < 18 ||
+        (age === 18 && monthDiff < 0) ||
+        (age === 18 && monthDiff === 0 && dayDiff < 0)
+      ) {
+        e.preventDefault();
+        document.getElementById('birthdateError').innerText = "Please enter a valid birth date.";
+        return false;
+      } else {
+        document.getElementById('birthdateError').innerText = "";
+      }
+
+      // Expiry must be in future
+      const expiry = document.getElementById('expiry').value;
+      const expDate = new Date(expiry + "-01");
+      if (expDate <= new Date()) {
+        e.preventDefault();
+        document.getElementById('expiryError').innerText = "Enter a valid expiry month in the future.";
+        return false;
+      } else {
+        document.getElementById('expiryError').innerText = "";
+      }
+    });
+  </script>
+</body>
+</html>
